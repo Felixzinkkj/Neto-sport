@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neto Sport — Painel do Atendente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{ --black:#000; --yellow:#FFD400; --charcoal:#161616; --border:#2a2a2a; --danger:#e5484d; --green:#4caf50; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:#fff;font-family:'Inter',Arial,sans-serif;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.94);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .topbar .brand{font-family:'Poppins';font-weight:800;font-size:1.1rem;}
+  .topbar .brand span{color:var(--yellow);}
+  .topbar a{color:#ccc;font-size:.85rem;}
+  .wrap{max-width:920px;margin:0 auto;padding:24px;}
+  .sub{color:#999;margin-bottom:20px;}
+  .bloqueado{padding:80px 20px;text-align:center;color:#aaa;max-width:420px;margin:0 auto;}
+
+  /* Abas grandes, fáceis de tocar */
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px;}
+  .tab-btn{background:var(--charcoal);border:1px solid var(--border);border-radius:10px;padding:16px 8px;
+    text-align:center;color:#ccc;font-weight:700;font-size:.82rem;cursor:pointer;}
+  .tab-btn .n{display:block;font-size:1.5rem;margin-bottom:4px;}
+  .tab-btn.active{background:var(--yellow);color:#000;border-color:var(--yellow);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  .card{background:var(--charcoal);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;}
+  .card h2{font-size:1.15rem;margin-bottom:6px;}
+  .card .desc{color:#888;font-size:.82rem;margin-bottom:16px;}
+
+  label{display:block;font-size:.8rem;color:#aaa;margin-bottom:6px;margin-top:14px;font-weight:600;}
+  input, select, textarea{width:100%;padding:14px;background:#0d0d0d;border:1px solid #333;color:#fff;border-radius:8px;font-size:1rem;font-family:inherit;}
+  input:focus, select:focus{outline:none;border-color:var(--yellow);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  button{font-family:inherit;cursor:pointer;border:none;}
+  .btn-grande{width:100%;background:var(--yellow);color:#000;font-weight:800;padding:18px;
+    border-radius:10px;font-size:1.05rem;margin-top:18px;}
+  .btn-grande:disabled{opacity:.5;}
+  .btn-sec{background:#0d0d0d;color:#ccc;border:1px solid #333;padding:10px 16px;border-radius:8px;font-size:.85rem;}
+  .btn-verde{background:var(--green);color:#000;font-weight:800;padding:10px 16px;border-radius:8px;font-size:.85rem;}
+  .btn-vermelho{background:rgba(229,72,77,.15);color:var(--danger);border:1px solid rgba(229,72,77,.4);padding:8px 12px;border-radius:8px;font-size:.78rem;font-weight:700;}
+
+  .lista-busca{max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:8px;}
+  .item-busca{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #232323;cursor:pointer;}
+  .item-busca:hover{background:#1c1c1c;}
+  .item-busca img{width:38px;height:38px;object-fit:cover;border-radius:5px;background:#000;}
+  .item-busca .info{flex:1;}
+  .item-busca .nome{font-weight:600;font-size:.9rem;}
+  .item-busca .meta{color:#888;font-size:.75rem;}
+
+  .carrinho-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #232323;}
+  .carrinho-item .info{flex:1;}
+  .carrinho-item .nome{font-weight:600;font-size:.92rem;}
+  .carrinho-item .meta{color:#888;font-size:.78rem;}
+  .qtd-controle{display:flex;align-items:center;gap:8px;}
+  .qtd-controle button{width:32px;height:32px;background:#0d0d0d;border:1px solid #333;color:#fff;border-radius:6px;font-size:1.1rem;}
+  .total-linha{display:flex;justify-content:space-between;align-items:center;padding-top:16px;font-size:1.2rem;font-weight:800;}
+  .total-linha .valor{color:var(--yellow);}
+
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th{text-align:left;color:#888;font-weight:600;font-size:.72rem;text-transform:uppercase;padding:8px;border-bottom:1px solid var(--border);}
+  td{border-bottom:1px solid #232323;padding:10px 8px;vertical-align:middle;}
+  .status-tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700;}
+  .status-pendente{background:rgba(255,212,0,.15);color:var(--yellow);}
+  .status-pago,.status-em_preparo,.status-enviado,.status-entregue{background:rgba(76,175,80,.15);color:var(--green);}
+  .status-cancelado,.status-estornado{background:rgba(229,72,77,.15);color:var(--danger);}
+  .vazio{text-align:center;color:#777;padding:24px;}
+  .msg{margin-top:12px;font-size:.85rem;color:#aaa;}
+  .msg.ok{color:var(--green);}
+  .msg.erro{color:var(--danger);}
+  .sucesso-box{background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.35);border-radius:10px;padding:18px;text-align:center;margin-bottom:16px;}
+  .sucesso-box .check{font-size:2rem;}
+  .estoque-input{width:64px;padding:8px;text-align:center;}
+  @media(max-width:640px){ .tabs{grid-template-columns:repeat(2,1fr);} .row2{grid-template-columns:1fr;} table{font-size:.75rem;} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">NETO <span>SPORT</span> · Atendente</div>
+  <a href="../loja.html">← Voltar para a loja</a>
+</div>
+
+<div id="tela-bloqueada" class="bloqueado" style="display:none;"></div>
+
+<div id="conteudo" class="wrap" style="display:none;">
+  <h1>Painel do atendente</h1>
+  <p class="sub">Registre vendas, dê baixa em pedidos e cadastre produtos — bem simples, direto ao ponto.</p>
+
+  <div class="tabs">
+    <div class="tab-btn active" data-tab="venda"><span class="n">🛒</span>Nova venda</div>
+    <div class="tab-btn" data-tab="pendentes"><span class="n">⏳</span>Pedidos pendentes</div>
+    <div class="tab-btn" data-tab="minhas"><span class="n">📋</span>Minhas vendas</div>
+    <div class="tab-btn" data-tab="produtos"><span class="n">📦</span>Produtos</div>
+  </div>
+
+  <!-- ===================== ABA: NOVA VENDA ===================== -->
+  <div class="tab-pane active" id="pane-venda">
+    <div class="card">
+      <h2>1. Buscar produto</h2>
+      <div class="desc">Digite o nome do produto para adicionar na venda.</div>
+      <input id="busca-produto" placeholder="Ex: camiseta, boné, tênis...">
+      <div class="lista-busca" id="lista-busca"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Itens da venda</h2>
+      <div id="carrinho-venda"><p class="vazio">Nenhum item adicionado ainda.</p></div>
+      <div class="total-linha"><span>Total</span><span class="valor" id="total-venda">R$ 0,00</span></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Forma de pagamento</h2>
+      <select id="forma-pagamento">
+        <option value="dinheiro">Dinheiro</option>
+        <option value="pix">Pix</option>
+        <option value="cartao_debito">Cartão de débito</option>
+        <option value="cartao_credito_avista">Cartão de crédito à vista</option>
+        <option value="cartao_credito_parcelado">Cartão de crédito parcelado</option>
+        <option value="whatsapp">A combinar pelo WhatsApp (fica pendente)</option>
+      </select>
+      <div id="campo-parcelas" style="display:none;">
+        <label>Número de parcelas</label>
+        <select id="num-parcelas"></select>
+      </div>
+      <label>Nome do cliente (opcional)</label>
+      <input id="nome-cliente" placeholder="Ex: João da Silva">
+      <button class="btn-grande" id="btn-finalizar-venda">Finalizar venda</button>
+      <div class="msg" id="msg-venda"></div>
+    </div>
+  </div>
+
+  <!-- ===================== ABA: PEDIDOS PENDENTES ===================== -->
+  <div class="tab-pane" id="pane-pendentes">
+    <div class="card">
+      <h2>Pedidos pendentes da loja</h2>
+      <div class="desc">Quando o cliente confirmar o pagamento com você pelo WhatsApp, clique em "Dar baixa".</div>
+      <table>
+        <thead><tr><th>Data</th><th>Total</th><th>Ações</th></tr></thead>
+        <tbody id="tabela-pendentes"><tr><td colspan="3" class="vazio">Carregando…</td></tr></tbody>
+      </table>
+      <p class="desc" style="margin-top:12px;margin-bottom:0;">Se o cliente desistir da compra, use "Cancelar" em vez de "Dar baixa".</p>
+    </div>
+  </div>
+
+  <!-- ===================== ABA: MINHAS VENDAS ===================== -->
+  <div class="tab-pane" id="pane-minhas">
+    <div class="card">
+      <h2>Vendas que eu registrei</h2>
+      <table>
+        <thead><tr><th>Data</th><th>Cliente</th><th>Pagamento</th><th>Status</th><th>Total</th></tr></thead>
+        <tbody id="tabela-minhas"><tr><td colspan="5" class="vazio">Carregando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================== ABA: PRODUTOS ===================== -->
+  <div class="tab-pane" id="pane-produtos">
+    <div class="card">
+      <h2>Cadastrar produto novo</h2>
+      <label>Nome</label>
+      <input id="p-nome" placeholder="Ex: Camiseta Dry-Fit">
+      <div class="row2">
+        <div><label>Preço (R$)</label><input id="p-preco" type="number" step="0.01" placeholder="149.90"></div>
+        <div><label>Estoque</label><input id="p-estoque" type="number" value="0"></div>
+      </div>
+      <label>Categoria</label>
+      <div class="row2">
+        <select id="p-categoria"><option value="">Sem categoria</option></select>
+        <input id="p-categoria-nova" placeholder="Ou crie uma nova">
+      </div>
+      <label>Tamanhos (separados por vírgula, opcional)</label>
+      <input id="p-tamanhos" placeholder="P, M, G, GG">
+      <label>URL da imagem (opcional)</label>
+      <input id="p-imagem" placeholder="https://...">
+      <button class="btn-grande" id="btn-salvar-produto">Salvar produto</button>
+      <div class="msg" id="msg-produto"></div>
+    </div>
+
+    <div class="card">
+      <h2>Produtos cadastrados</h2>
+      <input id="filtro-produtos" placeholder="Buscar produto..." style="margin-bottom:12px;">
+      <table>
+        <thead><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
+        <tbody id="tabela-produtos"><tr><td colspan="4" class="vazio">Carregando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="../supabase-client.js"></script>
+<script>
+let USUARIO = null;
+let TODOS_PRODUTOS = [];
+let CARRINHO_VENDA = []; // { product_id, nome, preco_centavos, tamanho, quantidade, estoqueDisponivel }
+
+async function iniciar(){
+  const acesso = await verificarAcesso();
+  if (!acesso.ok) {
+    document.getElementById('tela-bloqueada').style.display = 'block';
+    document.getElementById('tela-bloqueada').textContent = acesso.motivo;
+    return;
+  }
+  USUARIO = acesso.user;
+  document.getElementById('conteudo').style.display = 'block';
+  const selectParcelas = document.getElementById('num-parcelas');
+  const maxP = window.NETO_SPORT_CONFIG.PARCELAS_MAXIMAS || 12;
+  for (let i = 2; i <= maxP; i++) {
+    const opt = document.createElement('option'); opt.value = i; opt.textContent = i + 'x'; selectParcelas.appendChild(opt);
+  }
+  carregarCategoriasSelect();
+  await carregarProdutos();
+  carregarPendentes();
+  carregarMinhasVendas();
+}
+iniciar();
+
+// ---------- Abas ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('pane-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- Produtos (compartilhado) ----------
+async function carregarProdutos(){
+  const { data } = await window.supa.from('products').select('*').order('nome');
+  TODOS_PRODUTOS = data || [];
+  renderTabelaProdutos();
+}
+
+function slugify(txt){
+  return txt.toString().toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).slice(2,7);
+}
+
+async function carregarCategoriasSelect(){
+  const { data } = await window.supa.from('categories').select('*').order('nome');
+  const select = document.getElementById('p-categoria');
+  select.innerHTML = '<option value="">Sem categoria</option>';
+  (data || []).forEach(c => {
+    const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.nome; select.appendChild(opt);
+  });
+}
+
+async function obterOuCriarCategoria(nome){
+  if (!nome || !nome.trim()) return null;
+  const nomeLimpo = nome.trim();
+  const { data: existente } = await window.supa.from('categories').select('id').ilike('nome', nomeLimpo).maybeSingle();
+  if (existente) return existente.id;
+  const { data: nova, error } = await window.supa.from('categories').insert({ nome: nomeLimpo, slug: slugify(nomeLimpo) }).select().single();
+  if (error) return null;
+  return nova.id;
+}
+
+document.getElementById('btn-salvar-produto').onclick = async () => {
+  const msg = document.getElementById('msg-produto'); msg.className = 'msg';
+  const nome = document.getElementById('p-nome').value.trim();
+  const preco = parseFloat(document.getElementById('p-preco').value);
+  if (!nome || isNaN(preco)) { msg.textContent = 'Preencha nome e preço.'; msg.className = 'msg erro'; return; }
+  const nomeCategoriaNova = document.getElementById('p-categoria-nova').value;
+  const categoriaSelecionada = document.getElementById('p-categoria').value;
+  const categoria_id = nomeCategoriaNova.trim() ? await obterOuCriarCategoria(nomeCategoriaNova) : (categoriaSelecionada || null);
+  const tamanhos = document.getElementById('p-tamanhos').value.split(',').map(t => t.trim()).filter(Boolean);
+
+  const { error } = await window.supa.from('products').insert({
+    nome, slug: slugify(nome),
+    preco_centavos: Math.round(preco * 100),
+    estoque: parseInt(document.getElementById('p-estoque').value) || 0,
+    categoria_id, tamanhos,
+    imagem_url: document.getElementById('p-imagem').value || null,
+  });
+  msg.textContent = error ? 'Erro: ' + error.message : 'Produto cadastrado!';
+  msg.className = error ? 'msg erro' : 'msg ok';
+  if (!error) {
+    ['p-nome','p-preco','p-estoque','p-tamanhos','p-imagem','p-categoria-nova'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('p-categoria').value = '';
+    carregarCategoriasSelect();
+    carregarProdutos();
+  }
+};
+
+function renderTabelaProdutos(){
+  const filtro = (document.getElementById('filtro-produtos').value || '').toLowerCase();
+  const lista = TODOS_PRODUTOS.filter(p => p.nome.toLowerCase().includes(filtro));
+  const tbody = document.getElementById('tabela-produtos');
+  tbody.innerHTML = lista.length ? lista.map(p => `
+    <tr>
+      <td>${escapeHtml(p.nome)}</td>
+      <td>${formatarPreco(p.preco_promocional_centavos || p.preco_centavos)}</td>
+      <td><input class="estoque-input" type="number" min="0" value="${p.estoque}" data-estoque="${p.id}"></td>
+      <td><button class="btn-vermelho" data-excluir="${p.id}">Excluir</button></td>
+    </tr>`).join('') : '<tr><td colspan="4" class="vazio">Nenhum produto encontrado.</td></tr>';
+
+  tbody.querySelectorAll('[data-estoque]').forEach(input => {
+    input.addEventListener('change', async () => {
+      const id = input.dataset.estoque;
+      const novo = Math.max(0, parseInt(input.value) || 0);
+      input.value = novo;
+      await window.supa.from('products').update({ estoque: novo }).eq('id', id);
+      const p = TODOS_PRODUTOS.find(x => x.id === id); if (p) p.estoque = novo;
+    });
+  });
+  tbody.querySelectorAll('[data-excluir]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.excluir;
+      const p = TODOS_PRODUTOS.find(x => x.id === id);
+      if (!confirm(`Excluir "${p.nome}"? Essa ação não pode ser desfeita.`)) return;
+      const { error } = await window.supa.from('products').delete().eq('id', id);
+      if (error) { alert('Erro ao excluir: ' + error.message); return; }
+      TODOS_PRODUTOS = TODOS_PRODUTOS.filter(x => x.id !== id);
+      renderTabelaProdutos();
+    });
+  });
+}
+document.getElementById('filtro-produtos').addEventListener('input', renderTabelaProdutos);
+
+// ---------- Nova venda: busca de produto ----------
+document.getElementById('busca-produto').addEventListener('input', (e) => {
+  const termo = e.target.value.trim().toLowerCase();
+  const resultado = document.getElementById('lista-busca');
+  if (!termo) { resultado.innerHTML = ''; return; }
+  const encontrados = TODOS_PRODUTOS.filter(p => p.ativo && p.nome.toLowerCase().includes(termo)).slice(0, 15);
+  resultado.innerHTML = encontrados.length ? encontrados.map(p => `
+    <div class="item-busca" data-produto="${p.id}">
+      <img src="${escapeHtml(p.imagem_url || '')}" onerror="this.style.visibility='hidden'">
+      <div class="info">
+        <div class="nome">${escapeHtml(p.nome)}</div>
+        <div class="meta">${formatarPreco(p.preco_promocional_centavos || p.preco_centavos)} · estoque: ${p.estoque}</div>
+      </div>
+    </div>`).join('') : '<div class="item-busca">Nenhum produto encontrado.</div>';
+
+  resultado.querySelectorAll('[data-produto]').forEach(el => {
+    el.addEventListener('click', () => {
+      const produto = TODOS_PRODUTOS.find(p => p.id === el.dataset.produto);
+      adicionarItemVenda(produto);
+      document.getElementById('busca-produto').value = '';
+      resultado.innerHTML = '';
+    });
+  });
+});
+
+function adicionarItemVenda(produto){
+  const tamanhos = Array.isArray(produto.tamanhos) ? produto.tamanhos : [];
+  const tamanho = tamanhos.length ? tamanhos[0] : null;
+  const existente = CARRINHO_VENDA.find(i => i.product_id === produto.id && i.tamanho === tamanho);
+  if (existente) { existente.quantidade += 1; }
+  else {
+    CARRINHO_VENDA.push({
+      product_id: produto.id, nome: produto.nome,
+      preco_centavos: produto.preco_promocional_centavos || produto.preco_centavos,
+      tamanho, tamanhosDisponiveis: tamanhos, quantidade: 1
+    });
+  }
+  renderCarrinhoVenda();
+}
+
+function renderCarrinhoVenda(){
+  const container = document.getElementById('carrinho-venda');
+  container.innerHTML = CARRINHO_VENDA.length ? CARRINHO_VENDA.map((item, idx) => `
+    <div class="carrinho-item">
+      <div class="info">
+        <div class="nome">${escapeHtml(item.nome)}</div>
+        <div class="meta">
+          ${formatarPreco(item.preco_centavos)}
+          ${item.tamanhosDisponiveis.length ? `· tam. <select data-tamanho="${idx}" style="width:auto;display:inline;padding:2px 6px;">${item.tamanhosDisponiveis.map(t => `<option value="${escapeHtml(t)}" ${t === item.tamanho ? 'selected' : ''}>${escapeHtml(t)}</option>`).join('')}</select>` : ''}
+        </div>
+      </div>
+      <div class="qtd-controle">
+        <button data-menos="${idx}">−</button>
+        <span>${item.quantidade}</span>
+        <button data-mais="${idx}">+</button>
+      </div>
+      <button class="btn-vermelho" data-remover="${idx}">×</button>
+    </div>`).join('') : '<p class="vazio">Nenhum item adicionado ainda.</p>';
+
+  container.querySelectorAll('[data-mais]').forEach(b => b.addEventListener('click', () => { CARRINHO_VENDA[b.dataset.mais].quantidade++; renderCarrinhoVenda(); }));
+  container.querySelectorAll('[data-menos]').forEach(b => b.addEventListener('click', () => {
+    const idx = b.dataset.menos;
+    CARRINHO_VENDA[idx].quantidade--;
+    if (CARRINHO_VENDA[idx].quantidade <= 0) CARRINHO_VENDA.splice(idx, 1);
+    renderCarrinhoVenda();
+  }));
+  container.querySelectorAll('[data-remover]').forEach(b => b.addEventListener('click', () => { CARRINHO_VENDA.splice(b.dataset.remover, 1); renderCarrinhoVenda(); }));
+  container.querySelectorAll('[data-tamanho]').forEach(sel => sel.addEventListener('change', () => { CARRINHO_VENDA[sel.dataset.tamanho].tamanho = sel.value; }));
+
+  const total = CARRINHO_VENDA.reduce((s, i) => s + i.preco_centavos * i.quantidade, 0);
+  document.getElementById('total-venda').textContent = formatarPreco(total);
+}
+
+document.getElementById('forma-pagamento').addEventListener('change', (e) => {
+  document.getElementById('campo-parcelas').style.display = e.target.value === 'cartao_credito_parcelado' ? 'block' : 'none';
+});
+
+document.getElementById('btn-finalizar-venda').onclick = async () => {
+  const msg = document.getElementById('msg-venda'); msg.className = 'msg';
+  if (!CARRINHO_VENDA.length) { msg.textContent = 'Adicione ao menos um item.'; msg.className = 'msg erro'; return; }
+
+  const btn = document.getElementById('btn-finalizar-venda');
+  btn.disabled = true; btn.textContent = 'Registrando…';
+
+  const formaPagamento = document.getElementById('forma-pagamento').value;
+  const parcelas = document.getElementById('num-parcelas').value;
+  const metodoFinal = formaPagamento === 'cartao_credito_parcelado' ? `cartao_credito_parcelado_${parcelas}x` : formaPagamento;
+  const statusFinal = formaPagamento === 'whatsapp' ? 'pendente' : 'pago';
+  const total = CARRINHO_VENDA.reduce((s, i) => s + i.preco_centavos * i.quantidade, 0);
+  const nomeCliente = document.getElementById('nome-cliente').value.trim() || null;
+
+  const { data: order, error: orderErr } = await window.supa.from('orders').insert({
+    user_id: null, atendente_id: USUARIO.id, origem: 'atendente',
+    status: statusFinal, total_centavos: total, metodo_pagamento: metodoFinal, cliente_nome: nomeCliente
+  }).select().single();
+
+  if (orderErr) { msg.textContent = 'Erro ao registrar venda: ' + orderErr.message; msg.className = 'msg erro'; btn.disabled = false; btn.textContent = 'Finalizar venda'; return; }
+
+  const itensParaInserir = CARRINHO_VENDA.map(i => ({
+    order_id: order.id, product_id: i.product_id, nome_produto: i.nome,
+    tamanho: i.tamanho, quantidade: i.quantidade, preco_unit_centavos: i.preco_centavos
+  }));
+  const { error: itensErr } = await window.supa.from('order_items').insert(itensParaInserir);
+  if (itensErr) { msg.textContent = 'Erro ao salvar itens: ' + itensErr.message; msg.className = 'msg erro'; btn.disabled = false; btn.textContent = 'Finalizar venda'; return; }
+
+  // Baixa de estoque imediata para vendas já pagas
+  if (statusFinal === 'pago') {
+    for (const item of CARRINHO_VENDA) {
+      const produto = TODOS_PRODUTOS.find(p => p.id === item.product_id);
+      if (!produto) continue;
+      const novoEstoque = Math.max(0, produto.estoque - item.quantidade);
+      await window.supa.from('products').update({ estoque: novoEstoque }).eq('id', item.product_id);
+      produto.estoque = novoEstoque;
+    }
+  }
+
+  msg.textContent = '';
+  document.getElementById('carrinho-venda').innerHTML = `<div class="sucesso-box"><div class="check">✅</div><strong>Venda registrada com sucesso!</strong><br>Total: ${formatarPreco(total)}</div>`;
+  document.getElementById('total-venda').textContent = 'R$ 0,00';
+  CARRINHO_VENDA = [];
+  document.getElementById('nome-cliente').value = '';
+  btn.disabled = false; btn.textContent = 'Finalizar venda';
+  renderTabelaProdutos();
+  carregarMinhasVendas();
+  setTimeout(() => { if (!CARRINHO_VENDA.length) renderCarrinhoVenda(); }, 2500);
+};
+
+// ---------- Pedidos pendentes (loja) ----------
+async function carregarPendentes(){
+  const { data, error } = await window.supa.from('orders').select('*').eq('status', 'pendente').order('criado_em', { ascending: false });
+  const tbody = document.getElementById('tabela-pendentes');
+  if (error) { tbody.innerHTML = `<tr><td colspan="3" class="vazio">Erro: ${error.message}</td></tr>`; return; }
+  tbody.innerHTML = data.length ? data.map(p => `
+    <tr data-pedido="${p.id}">
+      <td>${formatarData(p.criado_em)}</td>
+      <td>${formatarPreco(p.total_centavos)}</td>
+      <td><button class="btn-verde" data-baixa="${p.id}">Dar baixa</button> <button class="btn-vermelho" data-cancelar="${p.id}">Cancelar</button></td>
+    </tr>`).join('') : '<tr><td colspan="3" class="vazio">Nenhum pedido pendente 🎉</td></tr>';
+
+  tbody.querySelectorAll('[data-baixa]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.textContent = 'Confirmando…'; btn.disabled = true;
+      const { error } = await darBaixaPedido(btn.dataset.baixa);
+      if (error) { alert('Erro: ' + error.message); btn.textContent = 'Dar baixa'; btn.disabled = false; return; }
+      carregarPendentes();
+      carregarProdutos();
+    });
+  });
+
+  tbody.querySelectorAll('[data-cancelar]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Cancelar este pedido? Use quando o cliente desistir da compra.')) return;
+      btn.textContent = 'Cancelando…'; btn.disabled = true;
+      const { error } = await cancelarPedido(btn.dataset.cancelar);
+      if (error) { alert('Erro: ' + error.message); btn.textContent = 'Cancelar'; btn.disabled = false; return; }
+      carregarPendentes();
+    });
+  });
+}
+
+// ---------- Minhas vendas ----------
+async function carregarMinhasVendas(){
+  const { data, error } = await window.supa.from('orders').select('*').eq('atendente_id', USUARIO.id).order('criado_em', { ascending: false }).limit(50);
+  const tbody = document.getElementById('tabela-minhas');
+  if (error) { tbody.innerHTML = `<tr><td colspan="5" class="vazio">Erro: ${error.message}</td></tr>`; return; }
+  tbody.innerHTML = data.length ? data.map(p => `
+    <tr>
+      <td>${formatarData(p.criado_em)}</td>
+      <td>${escapeHtml(p.cliente_nome || '—')}</td>
+      <td>${escapeHtml(p.metodo_pagamento || '—')}</td>
+      <td><span class="status-tag status-${p.status}">${STATUS_LABEL[p.status] || p.status}</span></td>
+      <td>${formatarPreco(p.total_centavos)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="vazio">Você ainda não registrou nenhuma venda.</td></tr>';
+}
+</script>
+</body>
+</html>

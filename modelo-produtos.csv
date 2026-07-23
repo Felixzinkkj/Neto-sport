@@ -1,0 +1,4 @@
+nome,descricao,preco,preco_promocional,estoque,sku,categoria,tamanhos,imagem_url
+Camiseta Dry-Fit Performance,Tecido leve de secagem rápida,129.90,99.90,50,NS-0001,Camisetas,P;M;G;GG,https://exemplo.com/imagens/camiseta.jpg
+Shorts Running Pro,Shorts leve com bolso interno,89.90,,30,NS-0002,Shorts,P;M;G,https://exemplo.com/imagens/shorts.jpg
+Jaqueta Corta-Vento,Proteção contra vento e chuva fina,249.90,199.90,15,NS-0003,Jaquetas,M;G;GG,https://exemplo.com/imagens/jaqueta.jpg

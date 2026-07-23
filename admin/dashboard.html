@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neto Sport — Dashboard de Vendas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root{ --black:#000; --yellow:#FFD400; --charcoal:#161616; --border:#2a2a2a; --danger:#e5484d; --green:#4caf50; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:#fff;font-family:'Inter',Arial,sans-serif;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.94);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .topbar .brand{font-family:'Poppins';font-weight:800;font-size:1.1rem;}
+  .topbar .brand span{color:var(--yellow);}
+  .topbar nav{display:flex;gap:18px;font-size:.85rem;align-items:center;flex-wrap:wrap;}
+  .topbar nav a{color:#ccc;}
+  .topbar nav a.ativo{color:var(--yellow);font-weight:700;}
+  .wrap{max-width:1200px;margin:0 auto;padding:32px;}
+  .sub{color:#999;margin-bottom:24px;}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:24px 0;}
+  .kpi{background:var(--charcoal);border:1px solid var(--border);border-radius:10px;padding:20px;}
+  .kpi .label{color:#999;font-size:.78rem;margin-bottom:6px;}
+  .kpi .value{font-size:1.6rem;font-weight:800;color:var(--yellow);}
+  .kpi .value.small{font-size:1.3rem;}
+  .kpi .footnote{color:#777;font-size:.72rem;margin-top:4px;}
+  .charts{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;}
+  .card{background:var(--charcoal);border:1px solid var(--border);border-radius:10px;padding:22px;}
+  .card h2{font-size:1rem;margin-bottom:14px;}
+  .card .desc{color:#888;font-size:.8rem;margin-bottom:14px;margin-top:-8px;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th{text-align:left;color:#888;font-weight:600;font-size:.73rem;text-transform:uppercase;letter-spacing:.03em;padding:9px 8px;border-bottom:1px solid var(--border);}
+  td{border-bottom:1px solid #232323;padding:9px 8px;vertical-align:middle;}
+  select{background:#0d0d0d;color:#fff;border:1px solid #333;padding:8px;border-radius:6px;}
+  .bloqueado{padding:80px 20px;text-align:center;color:#aaa;max-width:420px;margin:0 auto;}
+  .status-tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700;}
+  .status-pendente{background:rgba(255,212,0,.15);color:var(--yellow);}
+  .status-pago,.status-em_preparo,.status-enviado,.status-entregue{background:rgba(76,175,80,.15);color:var(--green);}
+  .status-cancelado,.status-estornado{background:rgba(229,72,77,.15);color:var(--danger);}
+  button.baixa{background:var(--green);color:#000;font-weight:700;border:none;padding:7px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;margin-right:6px;}
+  button.baixa:hover{filter:brightness(1.1);}
+  button.cancelar{background:rgba(229,72,77,.15);color:var(--danger);border:1px solid rgba(229,72,77,.4);padding:7px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;font-weight:700;}
+  button.cancelar:hover{background:rgba(229,72,77,.28);}
+  .card.perigo{border-color:rgba(229,72,77,.4);}
+  .card.perigo h2{color:var(--danger);}
+  .btn-perigo{background:var(--danger);color:#fff;font-weight:700;border:none;padding:12px 18px;border-radius:8px;font-size:.85rem;cursor:pointer;}
+  .btn-perigo:hover{filter:brightness(1.1);}
+  .btn-perigo:disabled{opacity:.5;cursor:default;}
+  button.copiar{background:#0d0d0d;color:#ccc;border:1px solid #333;padding:6px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;}
+  code{background:#000;padding:2px 6px;border-radius:3px;font-size:.78rem;color:#ffd400;}
+  ol{margin-left:18px;color:#ccc;font-size:.85rem;line-height:1.7;}
+  a.link-externo{color:var(--yellow);}
+  .top-produtos-row{margin-top:20px;}
+  @media(max-width:800px){.charts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">NETO <span>SPORT</span> · Admin</div>
+  <nav>
+    <a href="../loja.html">← Voltar para a loja</a>
+    <a href="produtos.html">Produtos</a>
+    <a href="dashboard.html" class="ativo">Dashboard</a>
+  </nav>
+</div>
+
+<div id="tela-bloqueada" class="bloqueado" style="display:none;"></div>
+
+<div id="conteudo" class="wrap" style="display:none;">
+  <h1>Dashboard de vendas</h1>
+  <p class="sub">Faturamento, pedidos, cliques no WhatsApp e parcelamento no cartão.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Faturamento total (pago)</div><div class="value" id="kpi-faturamento">—</div></div>
+    <div class="kpi"><div class="label">Pedidos pagos</div><div class="value" id="kpi-pedidos">—</div></div>
+    <div class="kpi"><div class="label">Ticket médio</div><div class="value" id="kpi-ticket">—</div></div>
+    <div class="kpi"><div class="label">Pedidos pendentes</div><div class="value" id="kpi-pendentes">—</div></div>
+    <div class="kpi"><div class="label">Pedidos cancelados</div><div class="value" id="kpi-cancelados">—</div></div>
+    <div class="kpi">
+      <div class="label">Cliques em "Finalizar no WhatsApp"</div>
+      <div class="value" id="kpi-cliques-whatsapp">—</div>
+      <div class="footnote" id="kpi-cliques-hoje"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Taxa de conversão em pedido pago</div>
+      <div class="value small" id="kpi-conversao">—</div>
+      <div class="footnote">pedidos pagos ÷ cliques no WhatsApp</div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <h2>Faturamento por dia (últimos 30 dias)</h2>
+      <canvas id="chart-faturamento" height="110"></canvas>
+    </div>
+    <div class="card">
+      <h2>Pedidos por status</h2>
+      <canvas id="chart-status" height="110"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Parcelamento no cartão de crédito pelo WhatsApp</h2>
+    <p class="desc">Como o pagamento é combinado manualmente na conversa, o parcelamento no cartão funciona com um "Link de pagamento" gerado uma vez no seu provedor de pagamento — o cliente escolhe o número de parcelas na hora de pagar, direto pelo link.</p>
+    <ol>
+      <li>Crie uma conta grátis em um destes serviços: <a class="link-externo" href="https://www.mercadopago.com.br/tools/link-de-pagamento" target="_blank">Mercado Pago (Link de pagamento)</a>, <a class="link-externo" href="https://www.infinitepay.io" target="_blank">InfinitePay</a> ou <a class="link-externo" href="https://pagseguro.uol.com.br" target="_blank">PagSeguro</a>.</li>
+      <li>No painel deles, gere um "Link de pagamento" avulso, ativando a opção de parcelamento no cartão de crédito (normalmente até 12x).</li>
+      <li>Cole esse link no arquivo <code>config.js</code>, no campo <code>LINK_PAGAMENTO_CARTAO</code>.</li>
+      <li>Pronto: a partir de agora, toda mensagem de checkout que o cliente envia pelo WhatsApp já inclui automaticamente a opção de pagamento parcelado com esse link.</li>
+    </ol>
+    <p class="desc" style="margin-top:14px;">Link configurado atualmente: <code id="link-atual-parcelamento">carregando…</code></p>
+  </div>
+
+  <div class="card top-produtos-row">
+    <h2>Produtos mais vendidos</h2>
+    <table>
+      <thead><tr><th>Produto</th><th>Unidades vendidas</th><th>Receita</th></tr></thead>
+      <tbody id="tabela-top-produtos"><tr><td colspan="3">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h2>Últimos pedidos</h2>
+    <p class="desc">Clique em "Dar baixa" para marcar um pedido pendente como pago (também dá baixa no estoque automaticamente).</p>
+    <table>
+      <thead><tr><th>Data</th><th>Origem</th><th>Entrega</th><th>Status</th><th>Total</th><th>Ações</th></tr></thead>
+      <tbody id="tabela-pedidos"><tr><td colspan="6">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card perigo" style="margin-top:20px;">
+    <h2>⚠️ Zona de risco</h2>
+    <p class="desc">Apaga todo o histórico de pedidos, vendas e cliques no WhatsApp e zera todos os números do dashboard. Produtos, estoque e contas de usuário/atendente <strong>não são afetados</strong>. Essa ação não pode ser desfeita.</p>
+    <button class="btn-perigo" id="btn-reiniciar">Reiniciar todas as operações</button>
+    <div class="msg" id="msg-reiniciar" style="margin-top:10px;font-size:.82rem;color:#aaa;"></div>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="../supabase-client.js"></script>
+<script>
+let PEDIDOS = [];
+let CHART_FATURAMENTO = null;
+let CHART_STATUS = null;
+
+async function iniciar(){
+  const acesso = await verificarAcesso({ exigirAdmin: true });
+  if (!acesso.ok) {
+    document.getElementById('tela-bloqueada').style.display = 'block';
+    document.getElementById('tela-bloqueada').textContent = acesso.motivo;
+    return;
+  }
+  document.getElementById('conteudo').style.display = 'block';
+  document.getElementById('link-atual-parcelamento').textContent =
+    window.NETO_SPORT_CONFIG.LINK_PAGAMENTO_CARTAO || 'nenhum link configurado ainda';
+  carregarDashboard();
+}
+iniciar();
+
+async function carregarDashboard(){
+  const { data: pedidos, error } = await window.supa
+    .from('orders')
+    .select('*, order_items(*)')
+    .order('criado_em', { ascending: false });
+
+  if (error) {
+    document.getElementById('tela-bloqueada').style.display = 'block';
+    document.getElementById('tela-bloqueada').textContent = 'Erro ao carregar pedidos: ' + error.message;
+    return;
+  }
+  PEDIDOS = pedidos;
+
+  const { count: cliquesTotal } = await window.supa
+    .from('whatsapp_clicks').select('*', { count: 'exact', head: true });
+
+  const hojeStr = new Date().toISOString().slice(0,10);
+  const { count: cliquesHoje } = await window.supa
+    .from('whatsapp_clicks').select('*', { count: 'exact', head: true })
+    .gte('criado_em', hojeStr);
+
+  const pagos = pedidos.filter(p => ['pago','em_preparo','enviado','entregue'].includes(p.status));
+  const pendentes = pedidos.filter(p => p.status === 'pendente');
+  const cancelados = pedidos.filter(p => ['cancelado','estornado'].includes(p.status));
+
+  const faturamentoTotal = pagos.reduce((s, p) => s + p.total_centavos, 0);
+  document.getElementById('kpi-faturamento').textContent = formatarPreco(faturamentoTotal);
+  document.getElementById('kpi-pedidos').textContent = pagos.length;
+  document.getElementById('kpi-ticket').textContent = pagos.length ? formatarPreco(Math.round(faturamentoTotal / pagos.length)) : 'R$ 0,00';
+  document.getElementById('kpi-pendentes').textContent = pendentes.length;
+  document.getElementById('kpi-cancelados').textContent = cancelados.length;
+  document.getElementById('kpi-cliques-whatsapp').textContent = cliquesTotal ?? 0;
+  document.getElementById('kpi-cliques-hoje').textContent = `${cliquesHoje ?? 0} hoje`;
+  document.getElementById('kpi-conversao').textContent = cliquesTotal
+    ? `${((pagos.length / cliquesTotal) * 100).toFixed(0)}%` : '—';
+
+  // Faturamento por dia (últimos 30 dias)
+  const hoje = new Date();
+  const dias = Array.from({length: 30}, (_, i) => {
+    const d = new Date(hoje); d.setDate(d.getDate() - (29 - i));
+    return d.toISOString().slice(0,10);
+  });
+  const porDia = Object.fromEntries(dias.map(d => [d, 0]));
+  pagos.forEach(p => {
+    const dia = p.criado_em.slice(0,10);
+    if (dia in porDia) porDia[dia] += p.total_centavos / 100;
+  });
+  if (CHART_FATURAMENTO) CHART_FATURAMENTO.destroy();
+  CHART_FATURAMENTO = new Chart(document.getElementById('chart-faturamento'), {
+    type: 'line',
+    data: {
+      labels: dias.map(d => d.slice(8,10) + '/' + d.slice(5,7)),
+      datasets: [{ label: 'Faturamento (R$)', data: dias.map(d => porDia[d]), borderColor: '#FFD400', backgroundColor: 'rgba(255,212,0,.15)', fill: true, tension: .3 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#888' } }, y: { ticks: { color: '#888' } } } }
+  });
+
+  // Pedidos por status
+  const statusCount = {};
+  pedidos.forEach(p => statusCount[p.status] = (statusCount[p.status] || 0) + 1);
+  if (CHART_STATUS) CHART_STATUS.destroy();
+  CHART_STATUS = new Chart(document.getElementById('chart-status'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(statusCount),
+      datasets: [{ data: Object.values(statusCount), backgroundColor: ['#FFD400','#3a3a3a','#8a8a8a','#e55','#4caf50','#2196f3'] }]
+    },
+    options: { plugins: { legend: { labels: { color: '#ccc' } } } }
+  });
+
+  // Top produtos
+  const vendasPorProduto = {};
+  pagos.forEach(p => p.order_items.forEach(it => {
+    if (!vendasPorProduto[it.nome_produto]) vendasPorProduto[it.nome_produto] = { qtd: 0, receita: 0 };
+    vendasPorProduto[it.nome_produto].qtd += it.quantidade;
+    vendasPorProduto[it.nome_produto].receita += it.quantidade * it.preco_unit_centavos;
+  }));
+  const topProdutos = Object.entries(vendasPorProduto).sort((a,b) => b[1].qtd - a[1].qtd).slice(0, 10);
+  document.getElementById('tabela-top-produtos').innerHTML = topProdutos.length
+    ? topProdutos.map(([nome, v]) => `<tr><td>${escapeHtml(nome)}</td><td>${v.qtd}</td><td>${formatarPreco(v.receita)}</td></tr>`).join('')
+    : '<tr><td colspan="3">Ainda não há vendas pagas.</td></tr>';
+
+  renderTabelaPedidos();
+}
+
+function renderTabelaPedidos(){
+  if (!PEDIDOS.length) {
+    document.getElementById('tabela-pedidos').innerHTML = '<tr><td colspan="6">Nenhum pedido registrado ainda.</td></tr>';
+    return;
+  }
+  const FRETE_LABEL = { retirada: 'Retirada', entrega_local: 'Entrega local', correios: 'Correios' };
+  document.getElementById('tabela-pedidos').innerHTML = PEDIDOS.slice(0, 30).map(p => `
+    <tr data-pedido="${p.id}">
+      <td>${formatarData(p.criado_em)}</td>
+      <td>${p.origem === 'atendente' ? 'Balcão' : 'Loja/WhatsApp'}</td>
+      <td>${FRETE_LABEL[p.metodo_frete] || 'Retirada'}</td>
+      <td><span class="status-tag status-${p.status}">${STATUS_LABEL[p.status] || p.status}</span></td>
+      <td>${formatarPreco(p.total_centavos)}</td>
+      <td>${p.status === 'pendente'
+        ? `<button class="baixa" data-baixa="${p.id}">Dar baixa</button><button class="cancelar" data-cancelar="${p.id}">Cancelar</button>`
+        : '—'}</td>
+    </tr>`).join('');
+
+  document.querySelectorAll('[data-baixa]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.textContent = 'Confirmando…'; btn.disabled = true;
+      const { error } = await darBaixaPedido(btn.dataset.baixa);
+      if (error) { alert('Erro ao dar baixa: ' + error.message); btn.textContent = 'Dar baixa'; btn.disabled = false; return; }
+      const p = PEDIDOS.find(x => x.id === btn.dataset.baixa);
+      if (p) p.status = 'pago';
+      renderTabelaPedidos();
+    });
+  });
+
+  document.querySelectorAll('[data-cancelar]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Cancelar este pedido? Use quando o cliente desistir da compra.')) return;
+      btn.textContent = 'Cancelando…'; btn.disabled = true;
+      const { error } = await cancelarPedido(btn.dataset.cancelar);
+      if (error) { alert('Erro ao cancelar: ' + error.message); btn.textContent = 'Cancelar'; btn.disabled = false; return; }
+      const p = PEDIDOS.find(x => x.id === btn.dataset.cancelar);
+      if (p) p.status = 'cancelado';
+      renderTabelaPedidos();
+    });
+  });
+}
+
+// ---------- Reiniciar todas as operações (zona de risco) ----------
+document.getElementById('btn-reiniciar').addEventListener('click', async () => {
+  const msg = document.getElementById('msg-reiniciar');
+  const digitado = prompt('Isso vai apagar TODOS os pedidos, vendas e cliques registrados, e não pode ser desfeito.\n\nDigite REINICIAR (em maiúsculas) para confirmar:');
+  if (digitado !== 'REINICIAR') {
+    if (digitado !== null) { msg.textContent = 'Confirmação incorreta. Nada foi apagado.'; msg.style.color = 'var(--danger)'; }
+    return;
+  }
+  const btn = document.getElementById('btn-reiniciar');
+  btn.disabled = true; btn.textContent = 'Reiniciando…';
+  msg.textContent = '';
+  const { error } = await reiniciarOperacoes();
+  btn.disabled = false; btn.textContent = 'Reiniciar todas as operações';
+  if (error) { msg.textContent = 'Erro ao reiniciar: ' + error.message; msg.style.color = 'var(--danger)'; return; }
+  msg.textContent = 'Tudo reiniciado! Atualizando o dashboard…';
+  msg.style.color = 'var(--green)';
+  await carregarDashboard();
+});
+</script>
+</body>
+</html>

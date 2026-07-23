@@ -1,0 +1,51 @@
+nome,descricao,preco,preco_promocional,estoque,sku,categoria,tamanhos,imagem_url
+Tênis Runner Pro Masculino,Amortecimento leve para corrida de longa distância,259.90,219.90,40,TN-001,Tênis Masculino,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport1/600/600
+Tênis Runner Pro Feminino,Amortecimento leve para corrida de longa distância,259.90,219.90,35,TN-002,Tênis Feminino,34;35;36;37;38;39,https://picsum.photos/seed/netosport2/600/600
+Tênis Casual Street Masculino,"Cabedal em couro sintético, uso casual e diário",179.90,,28,TN-003,Tênis Masculino,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport3/600/600
+Tênis Casual Street Feminino,"Cabedal em couro sintético, uso casual e diário",179.90,,30,TN-004,Tênis Feminino,34;35;36;37;38;39,https://picsum.photos/seed/netosport4/600/600
+Tênis Training Grip Unissex,Solado antiderrapante para treino funcional,219.90,189.90,22,TN-005,Tênis Unissex,36;37;38;39;40;41;42,https://picsum.photos/seed/netosport5/600/600
+Tênis Skate Old School Unissex,"Base vulcanizada, reforço na lateral",199.90,,18,TN-006,Tênis Unissex,36;37;38;39;40;41;42,https://picsum.photos/seed/netosport6/600/600
+Tênis Basquete High Masculino,"Cano alto, amortecimento reforçado no calcanhar",289.90,249.90,15,TN-007,Tênis Masculino,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport7/600/600
+Tênis Caminhada Conforto Feminino,"Palmilha em memory foam, extra leve",169.90,,26,TN-008,Tênis Feminino,34;35;36;37;38;39,https://picsum.photos/seed/netosport8/600/600
+Chuteira Campo Speed Masculina,"Travas em borracha, ideal para gramado natural",229.90,199.90,20,CH-001,Chuteira Masculina,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport9/600/600
+Chuteira Society Control Masculina,Solado com travas curtas para grama sintética,199.90,,24,CH-002,Chuteira Masculina,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport10/600/600
+Chuteira Futsal Precision Masculina,"Solado liso, aderência em quadra",179.90,159.90,22,CH-003,Chuteira Masculina,38;39;40;41;42;43;44,https://picsum.photos/seed/netosport11/600/600
+Chuteira Campo Speed Feminina,"Travas em borracha, ideal para gramado natural",229.90,199.90,14,CH-004,Chuteira Feminina,34;35;36;37;38;39,https://picsum.photos/seed/netosport12/600/600
+Chinelo Slide Conforto Unissex,"Tira única acolchoada, uso casual",49.90,39.90,60,CN-001,Chinelo Unissex,36;37;38;39;40;41;42;43,https://picsum.photos/seed/netosport13/600/600
+Chinelo Dedo Clássico Masculino,Modelo tradicional em borracha macia,39.90,,55,CN-002,Chinelo Masculino,38;39;40;41;42;43,https://picsum.photos/seed/netosport14/600/600
+Chinelo Dedo Clássico Feminino,Modelo tradicional em borracha macia,39.90,,50,CN-003,Chinelo Feminino,34;35;36;37;38;39,https://picsum.photos/seed/netosport15/600/600
+Chinelo Rasteirinha Feminino,"Tira fina trançada, visual delicado",44.90,34.90,38,CN-004,Chinelo Feminino,34;35;36;37;38;39,https://picsum.photos/seed/netosport16/600/600
+Camisa Dry-Fit Performance Masculina,Tecido leve de secagem rápida,99.90,79.90,50,CM-001,Camisa Masculina,P;M;G;GG,https://picsum.photos/seed/netosport17/600/600
+Camisa Dry-Fit Performance Feminina,Tecido leve de secagem rápida,99.90,79.90,48,CM-002,Camisa Feminina,P;M;G;GG,https://picsum.photos/seed/netosport18/600/600
+Camisa Polo Essential Masculina,"Piquet 100% algodão, corte reto",119.90,,40,CM-003,Camisa Masculina,P;M;G;GG,https://picsum.photos/seed/netosport19/600/600
+Camisa Regata Treino Masculina,Recorte nas costas para ventilação,69.90,54.90,45,CM-004,Camisa Masculina,P;M;G;GG,https://picsum.photos/seed/netosport20/600/600
+Camisa Cropped Fitness Feminina,Modelo cropped para treinos e academia,74.90,,42,CM-005,Camisa Feminina,P;M;G;GG,https://picsum.photos/seed/netosport21/600/600
+Camisa Manga Longa UV Unissex,"Proteção solar UPF 50, ideal para trilha",129.90,109.90,30,CM-006,Camisa Unissex,P;M;G;GG,https://picsum.photos/seed/netosport22/600/600
+Camisa Térmica Segunda Pele Masculina,"Compressão leve, ideal para dias frios",89.90,,25,CM-007,Camisa Masculina,P;M;G;GG,https://picsum.photos/seed/netosport23/600/600
+Bermuda Tactel Training Masculina,Tecido leve com bolsos laterais,79.90,64.90,46,BM-001,Bermuda Masculina,P;M;G;GG,https://picsum.photos/seed/netosport24/600/600
+Bermuda Moletom Casual Masculina,Cordão ajustável e bolsos frontais,89.90,,38,BM-002,Bermuda Masculina,P;M;G;GG,https://picsum.photos/seed/netosport25/600/600
+Bermuda Ciclismo Compressão Masculina,Tecido compressivo com forro,99.90,84.90,20,BM-003,Bermuda Masculina,P;M;G;GG,https://picsum.photos/seed/netosport26/600/600
+Bermuda Praia Estampada Masculina,"Secagem rápida, forro em tela",69.90,,33,BM-004,Bermuda Masculina,P;M;G;GG,https://picsum.photos/seed/netosport27/600/600
+Short Saia Training Feminino,Modelo saia com short interno embutido,84.90,69.90,36,SH-001,Short Feminino,P;M;G;GG,https://picsum.photos/seed/netosport28/600/600
+Short Fitness Cós Alto Feminino,"Cós alto, tecido compressivo",79.90,,40,SH-002,Short Feminino,P;M;G;GG,https://picsum.photos/seed/netosport29/600/600
+Short Running Leve Masculino,Tecido ultraleve com bolso interno,69.90,59.90,34,SH-003,Short Masculino,P;M;G;GG,https://picsum.photos/seed/netosport30/600/600
+Calça Moletom Jogger Masculina,"Punho elástico, bolsos com zíper",139.90,119.90,35,CL-001,Calça Masculina,P;M;G;GG,https://picsum.photos/seed/netosport31/600/600
+Calça Legging Fitness Feminina,"Compressão média, cós alto",99.90,84.90,44,CL-002,Calça Feminina,P;M;G;GG,https://picsum.photos/seed/netosport32/600/600
+Calça Térmica Segunda Pele Unissex,Ideal para treinos em dias frios,109.90,,22,CL-003,Calça Unissex,P;M;G;GG,https://picsum.photos/seed/netosport33/600/600
+Calça Cargo Training Masculina,"Bolsos laterais, tecido resistente",149.90,129.90,18,CL-004,Calça Masculina,P;M;G;GG,https://picsum.photos/seed/netosport34/600/600
+Calça Wide Leg Conforto Feminina,"Modelagem ampla, cintura elástica",119.90,,26,CL-005,Calça Feminina,P;M;G;GG,https://picsum.photos/seed/netosport35/600/600
+Jaqueta Corta-Vento Masculina,Proteção contra vento e chuva fina,199.90,169.90,20,JQ-001,Jaqueta Masculina,P;M;G;GG,https://picsum.photos/seed/netosport36/600/600
+Jaqueta Corta-Vento Feminina,Proteção contra vento e chuva fina,199.90,169.90,18,JQ-002,Jaqueta Feminina,P;M;G;GG,https://picsum.photos/seed/netosport37/600/600
+Jaqueta Moletom Capuz Unissex,"Forro felpado, bolso canguru",159.90,,24,JQ-003,Jaqueta Unissex,P;M;G;GG,https://picsum.photos/seed/netosport38/600/600
+Corta-Vento Ciclismo Refletivo Masculino,Detalhes refletivos para uso noturno,179.90,149.90,15,JQ-004,Jaqueta Masculina,P;M;G;GG,https://picsum.photos/seed/netosport39/600/600
+Boné Aba Curva Clássico Unissex,Ajuste traseiro em velcro,59.90,49.90,50,BN-001,Boné Unissex,Único,https://picsum.photos/seed/netosport40/600/600
+Boné Aba Reta Street Unissex,"Estilo street, viseira plana",64.90,,40,BN-002,Boné Unissex,Único,https://picsum.photos/seed/netosport41/600/600
+Boné Trucker Tela Unissex,Tela nas laterais para ventilação,54.90,44.90,45,BN-003,Boné Unissex,Único,https://picsum.photos/seed/netosport42/600/600
+Meia Cano Alto Performance Unissex,"Compressão leve, reforço no calcanhar",24.90,,80,MA-001,Meias Unissex,Único,https://picsum.photos/seed/netosport43/600/600
+Meia Soquete Corrida Unissex,Tecido respirável antiodor,19.90,14.90,90,MA-002,Meias Unissex,Único,https://picsum.photos/seed/netosport44/600/600
+Meia Cano Médio Futebol Unissex,"Elástico firme, uso esportivo",22.90,,70,MA-003,Meias Unissex,Único,https://picsum.photos/seed/netosport45/600/600
+Mochila Esportiva Training Unissex,Compartimento para tênis e garrafa,129.90,109.90,25,MC-001,Mochilas Unissex,Único,https://picsum.photos/seed/netosport46/600/600
+Mochila Compacta Dia a Dia Unissex,Bolso frontal para acessórios,99.90,,30,MC-002,Mochilas Unissex,Único,https://picsum.photos/seed/netosport47/600/600
+Luva Treino Funcional Masculina,Proteção para levantamento de peso,49.90,39.90,28,LV-001,Acessórios Masculino,P;M;G,https://picsum.photos/seed/netosport48/600/600
+Faixa de Cabelo Fitness Feminina,"Tecido absorvente, ajuste elástico",19.90,,60,FX-001,Acessórios Feminino,Único,https://picsum.photos/seed/netosport49/600/600
+Top Fitness Alta Sustentação Feminino,"Alça larga, alta sustentação para treinos",89.90,74.90,32,TP-001,Camisa Feminina,P;M;G;GG,https://picsum.photos/seed/netosport50/600/600
